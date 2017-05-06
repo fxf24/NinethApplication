@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("웹뷰");
         program();
     }
 
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         wv1 = (WebView)findViewById(R.id.webView1);
         et1 = (EditText)findViewById(R.id.url1);
         dialog = new ProgressDialog(this);
+
 
         wv1.addJavascriptInterface(new JavaScriptMethods(), "MyApp");
         WebSettings webSettings = wv1.getSettings();
