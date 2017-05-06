@@ -209,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (flag) {
                             wv1.loadUrl("javascript:displayMsg()");
-                            Toast.makeText(getApplicationContext(),"들어옴",Toast.LENGTH_SHORT).show();
                         }
                         else {
                             data.add(new Data(name, "http://"+url));
