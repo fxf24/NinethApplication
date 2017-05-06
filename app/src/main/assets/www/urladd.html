@@ -43,13 +43,18 @@
 			return;
 		}
 		//여기에 앱 메소드 호출
+		MyApp.addToList(sitename.value, url.value);
 
+	}
+
+	function layoutVisible(){
+	    MyApp.layoutVisible();
 	}
   </script>
 </HEAD>
 
 <BODY style="text-align:center;background-color:#FFCCFF">
-<input type="button" value="URL 보이기" onclick="">
+<input type="button" value="URL 보이기" onclick="layoutVisible()">
 <h3>즐겨찾기를 추가해 보세요</h3>
 <TABLE style="background-color:#FFF2FF" align="center">
     <TR>

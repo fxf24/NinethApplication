@@ -2,8 +2,11 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
     <LinearLayout
+        android:id="@+id/web"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -26,13 +29,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="GO" />
-
-            <Button
-                android:onClick="onClick"
-                android:id="@+id/button2"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="change" />
         </LinearLayout>
 
         <WebView

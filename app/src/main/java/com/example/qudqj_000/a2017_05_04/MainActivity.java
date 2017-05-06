@@ -19,6 +19,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -32,9 +33,9 @@ public class MainActivity extends AppCompatActivity {
     EditText et1;
     ProgressDialog dialog;
     Animation animTop;
-    LinearLayout linear1;
+    LinearLayout linear1, linear2;
     ListView lv1;
-    ArrayList<String> name = new ArrayList<>();
+    ArrayList<String> sitename = new ArrayList<>();
     ArrayList<Data> data = new ArrayList<>();
     ArrayAdapter<String> adapter;
 
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
     void program(){
         lv1 = (ListView)findViewById(R.id.list1);
+        linear1 = (LinearLayout)findViewById(R.id.linear1);
+        linear2 = (LinearLayout)findViewById(R.id.web);
         wv1 = (WebView)findViewById(R.id.webView1);
         et1 = (EditText)findViewById(R.id.url1);
         dialog = new ProgressDialog(this);
@@ -58,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setSupportZoom(true);
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, name);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, sitename);
         lv1.setAdapter(adapter);
 
         wv1.setWebChromeClient(new WebChromeClient(){
@@ -96,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
                 et1.setText(url);
             }
         });
-        wv1.loadUrl("http://www.naver.com");
 
         animTop = AnimationUtils.loadAnimation(this, R.anim.translate_top);
         animTop.setAnimationListener(new Animation.AnimationListener() {
@@ -115,14 +117,46 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        linear1 = (LinearLayout)findViewById(R.id.linear1);
 
+        lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                wv1.loadUrl(data.get(position).getUrl());
+                linear2.setVisibility(View.VISIBLE);
+                lv1.setVisibility(View.INVISIBLE);
+                linear1.setVisibility(View.VISIBLE);
+
+            }
+        });
+
+        lv1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
+                dlg.setTitle("삭제")
+                        .setIcon(R.mipmap.ic_launcher)
+                        .setMessage("삭제 하시겠습니까?")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                data.remove(position);
+                                sitename.remove(position);
+                                adapter.notifyDataSetChanged();
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                return true;
+            }
+        });
+
+        wv1.loadUrl("http://www.naver.com");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 1, 0, "즐겨찾기추가");
-        menu.add(0,2,1,"즐겨찾기목록");
+        menu.add(0, 2, 1,"즐겨찾기목록");
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -131,11 +165,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId()==1){
             wv1.loadUrl("file:///android_asset/www/urladd.html");
+            linear2.setVisibility(View.VISIBLE);
+            lv1.setVisibility(View.INVISIBLE);
             linear1.setAnimation(animTop);
-//            animTop.start();
         }
         else if(item.getItemId()==2){
-
+            linear2.setVisibility(View.INVISIBLE);
+            lv1.setVisibility(View.VISIBLE);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -143,9 +179,6 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View v){
         if(v.getId() == R.id.button1){
 
-        }
-        else if(v.getId() == R.id.button2){
-            wv1.loadUrl("javascript:changeImage()");
         }
     }
 
@@ -155,31 +188,44 @@ public class MainActivity extends AppCompatActivity {
         JavaScriptMethods(){}
 
         @JavascriptInterface
-        public void displayToast(){
+        public void addToList(final String name, final String url){
             myhandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
-                    dlg.setTitle("그림변경")
-                            .setMessage("그림을 변경하시겠습니까?")
-                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    wv1.loadUrl("javascript:changeImage()");
-                                }
-                            })
-                            .setNegativeButton("Cancel", null)
-                            .show();
+                    if(data.size()==0){
+                        data.add(new Data(name, "http://"+url));
+                        sitename.add(name);
+                        adapter.notifyDataSetChanged();
+                        wv1.loadUrl("javascript:setMsg('등록되었습니다.')");
+                    }
+                    else {
+                        boolean flag = false;
+                        for (int i = 0; i<data.size();i++) {
+                            if(("http://"+url).equals(data.get(i).getUrl())){
+                                flag = true;
+                            }
+                        }
+                        if (flag) {
+                            wv1.loadUrl("javascript:displayMsg()");
+                            Toast.makeText(getApplicationContext(),"들어옴",Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            data.add(new Data(name, "http://"+url));
+                            sitename.add(name);
+                            adapter.notifyDataSetChanged();
+                            wv1.loadUrl("javascript:setMsg('등록되었습니다.')");
+                        }
+                    }
                 }
             });
         }
 
         @JavascriptInterface
-        public void addToList(){
+        public void layoutVisible(){
             myhandler.post(new Runnable() {
                 @Override
                 public void run() {
-
+                    linear1.setVisibility(View.VISIBLE);
                 }
             });
         }
